@@ -422,7 +422,7 @@ class ESP8266:
         else:
             False
     
-    def doHttpGet(self,host,path,user_agent="RPi-Pico", port=80):
+    def doHttpGet(self,host,path,user_agent, port=80):
         """
         This fucntion use to complete a HTTP Get operation
         

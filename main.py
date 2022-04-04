@@ -8,11 +8,11 @@ import time
 import sys
 
 ## ON-BOARD COMPONENTS
-lcd = LCD()
+lcd = LCD() 
 thermistor = machine.ADC(28)
 led_user = machine.PWM(machine.Pin(15))
 photoRes = machine.ADC(machine.Pin(26))
-led=Pin(25,Pin.OUT)
+led = Pin(25,Pin.OUT)
 led_user.freq(1000)
 
 ## WIFI MODUAL (ESP8266)
@@ -67,24 +67,21 @@ lcd.message("Starting Up...")
 #print("ReStart",esp01.reStart())
 print("StartUP",esp01.startUP())
 print("Echo-Off",esp01.echoING())
-print("\r\n\r\n")
-
+print("\r\n")
 
 ## Print ESP8266 AT comand version and SDK details
 esp8266_at_ver = esp01.getVersion()
 if(esp8266_at_ver != None):
     print(esp8266_at_ver)
 
-
 ## Set the current WiFi in SoftAP+STA
 esp01.setCurrentWiFiMode()
-print("\r\n\r\n")
-
+print("\r\n")
 
 ## Connect with the WiFi
-print("Try to connect with the WiFi..")
+print("Try to connect with the WiFi...")
 lcd.clear()
-lcd.message("Connecting WIFI...")
+lcd.message("Connecting WIFI")
 while (1):
     if "WIFI CONNECTED" in esp01.connectWiFi(wifi_ssid, wifi_pswd):
         print("CONNECTION SUCCESSFUL...")
@@ -97,29 +94,27 @@ while (1):
         lcd.message("Connection Failed")
         time.sleep(2)
 
-
-print("\r\n\r\n")
 print("Now it's time to start HTTP Post Operation.......\r\n")
 
 lcd.clear()
 
 while(1):    
+    # Toggle the on-board LED to indicate working status
     led.toggle()
-    time.sleep(0.1)
+    time.sleep(1)
     
+    # Fetch data from sensors
     postCal, postFah = tempCalculate()
     lcdDisplay(postCal)
     postLight = ledAdjustment(photoRes)
 
-    '''
-    Going to do HTTP Post Operation
-    '''
-    post_json="{\"Temprature in Celsius\":\"" + postCal + "\",\"Temprature in Fahrenheit\":\"" + postFah + "\",\"Light Intensity\":\"" + postLight + "\"}"
+    # Starting HTTP Post Operations    
+    post_json = "{\"Temprature in Celsius\":\"" + postCal + "\",\"Temprature in Fahrenheit\":\"" + postFah + "\",\"Light Intensity\":\"" + postLight + "\"}"
     httpCode, httpRes = esp01.doHttpPost("thingsboard.cloud","/api/v1/ACCESSTOKEN/telemetry","7fea98e0-b3bb-11ec-97ae-79978f9d7342", "application/json",post_json,port=80)
     print("-------------------------- HTTP Post Operation Result -----------------------")
-    print("HTTP Code:",httpCode)
+    print("HTTP Code:",httpCode) ## If HTTP Code == 200, Operation OK, otherwise failed.
     print("HTTP Response:",httpRes)
-    print("--------------------------------------------------------------------------------\r\n\r\n")
+    print("-----------------------------------------------------------------------------\r\n\r\n")
     #break
     
 
