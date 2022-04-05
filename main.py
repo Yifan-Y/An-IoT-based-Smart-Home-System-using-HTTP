@@ -21,7 +21,7 @@ esp8266_at_ver = None
 wifi_ssid = "VIDEOTRON2830"
 wifi_pswd = "M9KFU4MK7VCJU"
 
-## GET TEMPRATURE
+## GET TEMPERATURE (ADC)
 def tempCalculate():
     temperature_value = thermistor.read_u16()
     Vr = 3.3 * float(temperature_value) / 65535
@@ -34,7 +34,7 @@ def tempCalculate():
     fah = str('{:.2f}'.format(Fah))
     return cel, fah
 
-## DISPLAY TEMPRATURE ON LCD
+## DISPLAY TEMPERATURE ON LCD
 def lcdDisplay(temp):
     string = " Temperature is \n    " + temp + " C    "
     lcd.message(string)
@@ -42,10 +42,11 @@ def lcdDisplay(temp):
     #lcd.clear()
 
 ## LIGHT INTENSITY ADJUSTMENT
+## Control the intensity by adjusting the duty cycle of the LED (PWM)
 def ledAdjustment(photoGP):
     light = round(photoGP.read_u16()/65535*100, 2)
     #print ("light: " + str(light) +"%")
-    lightstr = str(light) + " %"
+    lightstr = str(light)
     utime.sleep_ms(200)
     if light <= 40:
         led_user.duty_u16(65535)
@@ -109,7 +110,7 @@ while(1):
     postLight = ledAdjustment(photoRes)
 
     # Starting HTTP Post Operations    
-    post_json = "{\"Temprature in Celsius\":\"" + postCal + "\",\"Temprature in Fahrenheit\":\"" + postFah + "\",\"Light Intensity\":\"" + postLight + "\"}"
+    post_json = "{\"Temperature in Celsius\":\"" + postCal + "\",\"Temperature in Fahrenheit\":\"" + postFah + "\",\"Light Intensity\":\"" + postLight + "\"}"
     httpCode, httpRes = esp01.doHttpPost("thingsboard.cloud","/api/v1/ACCESSTOKEN/telemetry","7fea98e0-b3bb-11ec-97ae-79978f9d7342", "application/json",post_json,port=80)
     print("-------------------------- HTTP Post Operation Result -----------------------")
     print("HTTP Code:",httpCode) ## If HTTP Code == 200, Operation OK, otherwise failed.
