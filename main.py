@@ -7,19 +7,19 @@ import math
 import time
 import sys
 
-## ON-BOARD COMPONENTS
-lcd = LCD() 
-thermistor = machine.ADC(28)
-led_user = machine.PWM(machine.Pin(15))
-photoRes = machine.ADC(machine.Pin(26))
-led = Pin(25,Pin.OUT)
-led_user.freq(1000)
+## ONBOARD COMPONENTS
+lcd = LCD() # Create a LCD instance
+thermistor = machine.ADC(28) # The thermistor connects to the GPIO 28
+led_user = machine.PWM(machine.Pin(15)) # The LED connects to the GPIO 15
+photoRes = machine.ADC(machine.Pin(26)) # The Photoresistor connects to the GPIO 26
+led = Pin(25,Pin.OUT) # The onboard LED connects to the GPIO 25
+led_user.freq(1000) # Set the LED frequency at 1000 Hz
 
 ## WIFI MODUAL (ESP8266)
-esp01 = ESP8266()
-esp8266_at_ver = None
-wifi_ssid = "VIDEOTRON2830"
-wifi_pswd = "M9KFU4MK7VCJU"
+esp01 = ESP8266() # Create an ESP8266 instance
+esp8266_at_ver = None # Create an variable to record the AT version
+wifi_ssid = "VIDEOTRON2830" # Configure the ssid of wifi ap
+wifi_pswd = "M9KFU4MK7VCJU" # Configure the password of wifi ap
 
 ## GET TEMPERATURE (ADC)
 def tempCalculate():
@@ -42,7 +42,6 @@ def lcdDisplay(temp):
     #lcd.clear()
 
 ## LIGHT INTENSITY ADJUSTMENT
-## Control the intensity by adjusting the duty cycle of the LED (PWM)
 def ledAdjustment(photoGP):
     light = round(photoGP.read_u16()/65535*100, 2)
     #print ("light: " + str(light) +"%")
@@ -63,11 +62,9 @@ def ledAdjustment(photoGP):
     return lightstr
 
 ## START UP WIFI MODUAL
-print("StartUP",esp01.startUP())
+print("StartUP",esp01.startUP()) ## Checking the communication between MCU and ESP 8266
 lcd.message("Starting Up...")
-#print("ReStart",esp01.reStart())
-print("StartUP",esp01.startUP())
-print("Echo-Off",esp01.echoING())
+print("Echo-Off",esp01.echoING()) ## Enabling the AT command echo off
 print("\r\n")
 
 ## Print ESP8266 AT comand version and SDK details
@@ -75,7 +72,7 @@ esp8266_at_ver = esp01.getVersion()
 if(esp8266_at_ver != None):
     print(esp8266_at_ver)
 
-## Set the current WiFi in SoftAP+STA
+## Set the current WiFi in SoftAP+STA mode
 esp01.setCurrentWiFiMode()
 print("\r\n")
 
@@ -87,12 +84,13 @@ while (1):
     if "WIFI CONNECTED" in esp01.connectWiFi(wifi_ssid, wifi_pswd):
         print("CONNECTION SUCCESSFUL...")
         lcd.clear()
-        lcd.message("Connection Seccessful")
+        lcd.message("Seccessful!")
+        time.sleep(2)
         break;
     else:
         print("CONNECTION FAILED...")
         lcd.clear()
-        lcd.message("Connection Failed")
+        lcd.message("Failed!")
         time.sleep(2)
 
 print("Now it's time to start HTTP Post Operation.......\r\n")
@@ -100,7 +98,7 @@ print("Now it's time to start HTTP Post Operation.......\r\n")
 lcd.clear()
 
 while(1):    
-    # Toggle the on-board LED to indicate working status
+    # Toggle the onboard LED to indicate working status
     led.toggle()
     time.sleep(1)
     
@@ -109,15 +107,24 @@ while(1):
     lcdDisplay(postCal)
     postLight = ledAdjustment(photoRes)
 
-    # Starting HTTP Post Operations    
+    # Build up JSON statement
     post_json = "{\"Temperature in Celsius\":\"" + postCal + "\",\"Temperature in Fahrenheit\":\"" + postFah + "\",\"Light Intensity\":\"" + postLight + "\"}"
+    print ("Posting JSON statement: " + post_json + "\n")
+    
+    ## Starting HTTP Post Operations    
     httpCode, httpRes = esp01.doHttpPost("thingsboard.cloud","/api/v1/ACCESSTOKEN/telemetry","7fea98e0-b3bb-11ec-97ae-79978f9d7342", "application/json",post_json,port=80)
     print("-------------------------- HTTP Post Operation Result -----------------------")
     print("HTTP Code:",httpCode) ## If HTTP Code == 200, Operation OK, otherwise failed.
     print("HTTP Response:",httpRes)
     print("-----------------------------------------------------------------------------\r\n\r\n")
-    #break
+    if (httpCode == "200"):
+        print("HTTP post operation successful!")
+    else
+        print("HTTP post operation failed! Error Code: " + httpCode + "\n")
+
     
+
+
 
 
 
