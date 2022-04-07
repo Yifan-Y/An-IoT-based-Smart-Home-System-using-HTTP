@@ -117,9 +117,9 @@ while(1):
     print("HTTP Code:",httpCode) ## If HTTP Code == 200, Operation OK, otherwise failed.
     print("HTTP Response:",httpRes)
     print("-----------------------------------------------------------------------------\r\n\r\n")
-    if (httpCode == "200"):
+    if httpCode == "200":
         print("HTTP post operation successful!")
-    else
+    else:
         print("HTTP post operation failed! Error Code: " + httpCode + "\n")
 
     
