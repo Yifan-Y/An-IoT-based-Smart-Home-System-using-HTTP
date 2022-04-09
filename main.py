@@ -1,3 +1,4 @@
+from sqlalchemy import true
 from machine import UART, Pin
 from esp8266 import ESP8266
 from lcd1602 import LCD
@@ -62,9 +63,9 @@ def ledAdjustment(photoGP):
     return lightstr
 
 ## START UP WIFI MODUAL
-print("StartUP",esp01.startUP()) ## Checking the communication between MCU and ESP 8266
+print("Start up wifi module...",esp01.startUP()) ## Checking the communication between MCU and ESP 8266
 lcd.message("Starting Up...")
-print("Echo-Off",esp01.echoING()) ## Enabling the AT command echo off
+print("Enabling AT command echo off...",esp01.echoING()) ## Enabling the AT command echo off
 print("\r\n")
 
 ## Print ESP8266 AT comand version and SDK details
@@ -86,7 +87,7 @@ while (1):
         lcd.clear()
         lcd.message("Seccessful!")
         time.sleep(2)
-        break;
+        break
     else:
         print("CONNECTION FAILED...")
         lcd.clear()
@@ -97,7 +98,7 @@ print("Now it's time to start HTTP Post Operation.......\r\n")
 
 lcd.clear()
 
-while(1):    
+while true:    
     # Toggle the onboard LED to indicate working status
     led.toggle()
     time.sleep(1)
@@ -114,17 +115,10 @@ while(1):
     ## Starting HTTP Post Operations    
     httpCode, httpRes = esp01.doHttpPost("thingsboard.cloud","/api/v1/ACCESSTOKEN/telemetry","7fea98e0-b3bb-11ec-97ae-79978f9d7342", "application/json",post_json,port=80)
     print("-------------------------- HTTP Post Operation Result -----------------------")
-    print("HTTP Code:",httpCode) ## If HTTP Code == 200, Operation OK, otherwise failed.
+    print("HTTP Code:",httpCode) # If HTTP Code == 200, Operation OK, otherwise failed.
     print("HTTP Response:",httpRes)
     print("-----------------------------------------------------------------------------\r\n\r\n")
     if httpCode == "200":
         print("HTTP post operation successful!")
     else:
         print("HTTP post operation failed! Error Code: " + httpCode + "\n")
-
-    
-
-
-
-
-
